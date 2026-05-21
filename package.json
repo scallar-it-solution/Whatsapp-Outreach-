@@ -1,0 +1,60 @@
+{
+  "name": "scallar-whatsapp-outreach",
+  "version": "1.0.0",
+  "description": "Production-grade WhatsApp outreach system for Scallar IT Solutions.",
+  "main": "dist/index.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "worker": "tsx src/dispatch/worker.ts",
+    "webhook": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src",
+    "db:migrate": "tsx src/cli/index.ts db:migrate",
+    "db:rollback": "tsx src/cli/index.ts db:rollback",
+    "import:csv": "tsx src/cli/index.ts import:csv",
+    "campaign:load": "tsx src/cli/index.ts campaign:load",
+    "sender:test": "tsx src/cli/index.ts sender:test",
+    "queue:status": "tsx src/cli/index.ts queue:status"
+  },
+  "dependencies": {
+    "@fastify/view": "^9.1.0",
+    "better-sqlite3": "^12.2.0",
+    "bullmq": "^5.12.2",
+    "commander": "^12.1.0",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "fastify": "^4.28.1",
+    "knex": "^3.1.0",
+    "pg": "^8.12.0",
+    "pino": "^9.3.2",
+    "yaml": "^2.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^20.14.12",
+    "@types/pg": "^8.11.6",
+    "@typescript-eslint/eslint-plugin": "^7.16.1",
+    "@typescript-eslint/parser": "^7.16.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.7"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "overrides": {
+    "fast-uri": "^3.1.2"
+  }
+}

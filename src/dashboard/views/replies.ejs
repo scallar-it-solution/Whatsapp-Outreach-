@@ -1,0 +1,25 @@
+<section class="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
+  <table class="min-w-full divide-y divide-slate-800 text-sm">
+    <thead>
+      <tr>
+        <th class="px-4 py-3 text-left">Received</th>
+        <th class="px-4 py-3 text-left">Sender</th>
+        <th class="px-4 py-3 text-left">Remote JID</th>
+        <th class="px-4 py-3 text-left">Classification</th>
+        <th class="px-4 py-3 text-left">Text</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-800">
+      <% replies.forEach(function(reply) { %>
+        <% const badge = reply.classification === 'interested' ? 'bg-emerald-500/15 text-emerald-300' : reply.classification === 'unsubscribed' ? 'bg-red-500/15 text-red-300' : 'bg-slate-700 text-slate-200'; %>
+        <tr>
+          <td class="px-4 py-3"><%= reply.received_at %></td>
+          <td class="px-4 py-3"><%= reply.sender_instance %></td>
+          <td class="px-4 py-3"><%= reply.remote_jid %></td>
+          <td class="px-4 py-3"><span class="rounded-full px-2 py-1 <%= badge %>"><%= reply.classification || 'neutral' %></span></td>
+          <td class="max-w-xl px-4 py-3"><%= reply.message_text || '' %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>

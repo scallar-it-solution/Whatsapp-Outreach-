@@ -1,0 +1,33 @@
+<form class="mb-4 grid gap-3 rounded-lg border border-slate-800 bg-slate-900 p-4 sm:grid-cols-4" method="get">
+  <input type="hidden" name="token" value="<%= token %>" />
+  <input class="rounded-md border border-slate-700 bg-slate-950 px-3 py-2" name="status" placeholder="status" value="<%= filters.status || '' %>" />
+  <input class="rounded-md border border-slate-700 bg-slate-950 px-3 py-2" name="campaign" placeholder="campaign id" value="<%= filters.campaign || '' %>" />
+  <input class="rounded-md border border-slate-700 bg-slate-950 px-3 py-2" name="country" placeholder="country" value="<%= filters.country || '' %>" />
+  <button class="rounded-md bg-cyan-500 px-3 py-2 font-medium text-slate-950" type="submit">Filter</button>
+</form>
+<section class="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
+  <table class="min-w-full divide-y divide-slate-800 text-sm">
+    <thead>
+      <tr>
+        <th class="px-4 py-3 text-left">Business</th>
+        <th class="px-4 py-3 text-left">Phone</th>
+        <th class="px-4 py-3 text-left">Country</th>
+        <th class="px-4 py-3 text-left">City</th>
+        <th class="px-4 py-3 text-left">Status</th>
+        <th class="px-4 py-3 text-left">Campaign</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-800">
+      <% leads.forEach(function(lead) { %>
+        <tr>
+          <td class="px-4 py-3"><%= lead.business_name || '-' %></td>
+          <td class="px-4 py-3"><%= lead.phone.slice(-4).padStart(lead.phone.length, '*') %></td>
+          <td class="px-4 py-3"><%= lead.country %></td>
+          <td class="px-4 py-3"><%= lead.city || '-' %></td>
+          <td class="px-4 py-3"><%= lead.status %></td>
+          <td class="px-4 py-3"><%= lead.campaign_id %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>

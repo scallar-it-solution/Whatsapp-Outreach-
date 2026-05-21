@@ -1,0 +1,28 @@
+<section class="overflow-x-auto rounded-lg border border-slate-800 bg-slate-900">
+  <table class="min-w-full divide-y divide-slate-800 text-sm">
+    <thead>
+      <tr>
+        <th class="px-4 py-3 text-left">Name</th>
+        <th class="px-4 py-3 text-left">Country</th>
+        <th class="px-4 py-3 text-left">Template set</th>
+        <th class="px-4 py-3 text-left">Status</th>
+        <th class="px-4 py-3 text-left">Leads</th>
+        <th class="px-4 py-3 text-left">Sent</th>
+        <th class="px-4 py-3 text-left">Failed</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-800">
+      <% campaigns.forEach(function(campaign) { %>
+        <tr>
+          <td class="px-4 py-3 font-medium"><%= campaign.name %></td>
+          <td class="px-4 py-3"><%= campaign.country %></td>
+          <td class="px-4 py-3"><%= campaign.template_set %></td>
+          <td class="px-4 py-3"><%= campaign.status %></td>
+          <td class="px-4 py-3"><%= campaign.total_leads %></td>
+          <td class="px-4 py-3"><%= campaign.sent_count %></td>
+          <td class="px-4 py-3"><%= campaign.failed_count %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</section>

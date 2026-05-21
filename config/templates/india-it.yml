@@ -1,0 +1,30 @@
+set: india-it
+country: India
+category: it_services
+templates:
+  - id: india-it-1
+    name: response-speed
+    ab_label: A
+    body: |
+      Hi {{business_name}}, are new WhatsApp inquiries getting answered instantly?
+
+      Scallar builds simple automation for Indian service teams:
+      - Instant replies
+      - Lead qualification
+      - Follow-up reminders
+
+      Reply DEMO and I will share a short workflow.
+
+      - Scallar IT Solutions
+
+  - id: india-it-2
+    name: missed-leads
+    ab_label: B
+    body: |
+      Hi {{business_name}}, quick idea for teams in {{city}}.
+
+      We help businesses turn missed WhatsApp chats into booked calls with an automation bot.
+
+      Reply YES if you want the 5-minute walkthrough.
+
+      - Scallar IT Solutions

@@ -1,0 +1,17 @@
+[Unit]
+Description=Scallar WhatsApp Outreach Worker
+After=network-online.target redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/scallar-outreach
+EnvironmentFile=/opt/scallar-outreach/.env
+ExecStart=/usr/bin/node /opt/scallar-outreach/dist/worker.js
+Restart=always
+RestartSec=10
+User=scallar
+Group=scallar
+
+[Install]
+WantedBy=multi-user.target

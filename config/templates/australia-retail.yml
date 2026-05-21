@@ -1,0 +1,28 @@
+set: australia-retail
+country: Australia
+category: retail
+templates:
+  - id: au-retail-1
+    name: after-hours
+    ab_label: A
+    body: |
+      Hi {{business_name}}, do after-hours WhatsApp inquiries wait until the next day?
+
+      Scallar helps retail teams automate:
+      - Product answers
+      - Store visit bookings
+      - Follow-ups
+
+      Reply INFO and I will send a short example.
+
+      - Scallar IT Solutions
+
+  - id: au-retail-2
+    name: stock-questions
+    ab_label: B
+    body: |
+      Hi {{business_name}}, we build WhatsApp assistants that answer stock, pricing, and booking questions automatically.
+
+      If useful, reply DETAILS and I will share a simple walkthrough.
+
+      - Scallar IT Solutions

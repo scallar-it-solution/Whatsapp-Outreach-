@@ -1,0 +1,12 @@
+<% if (typeof queueError !== 'undefined') { %>
+  <div class="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-red-200"><%= queueError %></div>
+<% } else { %>
+  <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <% [['Waiting', queueCounts.waiting], ['Active', queueCounts.active], ['Delayed', queueCounts.delayed], ['Failed', queueCounts.failed], ['Dead letter', queueCounts.deadLetter]].forEach(function(item) { %>
+      <div class="rounded-lg border border-slate-800 bg-slate-900 p-4">
+        <div class="text-sm text-slate-400"><%= item[0] %></div>
+        <div class="mt-2 text-3xl font-semibold"><%= item[1] %></div>
+      </div>
+    <% }) %>
+  </section>
+<% } %>

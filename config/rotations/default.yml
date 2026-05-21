@@ -1,0 +1,7 @@
+rotation:
+  - country: UAE
+    template_set: uae-realestate
+  - country: India
+    template_set: india-it
+  - country: Australia
+    template_set: australia-retail

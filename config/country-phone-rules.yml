@@ -1,0 +1,13 @@
+countries:
+  UAE:
+    country_code: "971"
+    mobile_pattern: "^5\\d{8}$"
+    reject_prefixes: ["2", "3", "4", "6", "7", "9"]
+  India:
+    country_code: "91"
+    mobile_pattern: "^[6-9]\\d{9}$"
+    reject_prefixes: ["0", "1", "2", "3", "4", "5"]
+  Australia:
+    country_code: "61"
+    mobile_pattern: "^4\\d{8}$"
+    reject_prefixes: ["2", "3", "7", "8"]

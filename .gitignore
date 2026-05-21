@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Runtime data
+sessions/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Lead/customer data
+*.csv
+leads/
+exports/
+uploads/
+
+# Build output
+dist/
+build/
+coverage/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temporary
+tmp/
+temp/
