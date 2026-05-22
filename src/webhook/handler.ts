@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { FinalMessageStatus } from '../config/constants';
 import { getDb } from '../db/client';
 import type {
+  CampaignRow,
   JidMappingRow,
   LeadRow,
   MessageUpdateRow,
@@ -11,6 +12,7 @@ import type {
   SenderRow,
   UnsubscribeRow,
 } from '../db/schema';
+import { pushInterestedLeadToCrm } from '../crm/client';
 import type { EvolutionWebhookPayload, JsonObject } from '../evolution/types';
 import { updateSenderHealth } from '../evolution/sender-health';
 import { createId } from '../utils/crypto';
@@ -206,6 +208,7 @@ async function handleMessagesUpsert(payload: EvolutionWebhookPayload): Promise<v
       received_at: now,
     });
     if (found.lead !== null) {
+      const previousStatus = found.lead.status;
       const leadStatus =
         classification === 'interested'
           ? 'interested'
@@ -215,6 +218,24 @@ async function handleMessagesUpsert(payload: EvolutionWebhookPayload): Promise<v
       await db<LeadRow>('leads')
         .where({ id: found.lead.id })
         .update({ status: leadStatus, updated_at: now });
+      if (classification === 'interested' && previousStatus !== 'interested') {
+        try {
+          const campaign = await db<CampaignRow>('campaigns')
+            .where({ id: found.lead.campaign_id })
+            .first();
+          await pushInterestedLeadToCrm({
+            lead: found.lead,
+            campaign: campaign ?? null,
+            replyText: text,
+            senderInstance: instance,
+            remoteJid: resolvedJid,
+            receivedAt: now,
+          });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'unknown CRM push error';
+          logger.error({ service: 'crm', err: message }, 'interested lead CRM push failed');
+        }
+      }
     }
     if (classification === 'unsubscribed' && phoneForResolution.length > 0) {
       await db<UnsubscribeRow>('unsubscribes')
@@ -252,9 +273,17 @@ async function handleMessagesUpdate(payload: EvolutionWebhookPayload): Promise<v
       raw_payload: JSON.stringify(payload),
       received_at: now,
     });
-    await db<SendLogRow>('send_logs')
-      .where({ message_id: messageId })
-      .update({ final_status: status, resolved_at: now });
+    const sendLog = await db<SendLogRow>('send_logs').where({ message_id: messageId }).first();
+    if (sendLog !== undefined) {
+      await db<SendLogRow>('send_logs')
+        .where({ id: sendLog.id })
+        .update({ final_status: status, resolved_at: now });
+      const lead = await db<LeadRow>('leads').where({ id: sendLog.lead_id }).first();
+      const remoteJid = extractRemoteJid(payload);
+      if (lead !== undefined && remoteJid?.endsWith('@lid') === true) {
+        await resolveRecipientJid(instance, lead.phone, payload);
+      }
+    }
     await updateSenderHealth(instance, status, payload as JsonObject);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown update webhook error';

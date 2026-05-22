@@ -1,5 +1,6 @@
 import knex, { type Knex } from 'knex';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { config } from '../src/config/env';
 import { closeDb, getDb, replaceDbForTests } from '../src/db/client';
 import * as m001 from '../src/db/migrations/001_senders';
 import * as m002 from '../src/db/migrations/002_campaigns';
@@ -85,11 +86,14 @@ async function seedCore(): Promise<void> {
 
 describe('processEvolutionWebhook', () => {
   beforeEach(async () => {
+    config.CRM_WEBHOOK_URL = undefined;
+    config.CRM_API_KEY = undefined;
     await setupDb();
     await seedCore();
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await closeDb();
   });
 
@@ -107,6 +111,52 @@ describe('processEvolutionWebhook', () => {
     const reply = await getDb()('replies').first();
     expect(lead.status).toBe('interested');
     expect(reply.classification).toBe('interested');
+  });
+
+  it('pushes only interested replies to CRM', async () => {
+    config.CRM_WEBHOOK_URL = 'https://crm.example.test';
+    config.CRM_API_KEY = 'test-key';
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ id: 'crm1' }), { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await processEvolutionWebhook({
+      event: 'MESSAGES_UPSERT',
+      instance: 'sender1',
+      data: {
+        key: { remoteJid: '919876543210@s.whatsapp.net', id: 'in-crm-1' },
+        message: { conversation: 'haan demo bhejo' },
+      },
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const call = fetchMock.mock.calls[0];
+    expect(call?.[0]).toBe('https://crm.example.test/api/v1/Lead');
+    const init = call?.[1] as RequestInit | undefined;
+    const body = JSON.parse(String(init?.body)) as Record<string, unknown>;
+    expect(init?.method).toBe('POST');
+    expect(body.phoneNumber).toBe('+919876543210');
+    expect(body.lastName).toBe('Acme');
+    expect(String(body.description)).toContain('haan demo bhejo');
+  });
+
+  it('does not push neutral auto-replies to CRM', async () => {
+    config.CRM_WEBHOOK_URL = 'https://crm.example.test';
+    config.CRM_API_KEY = 'test-key';
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ id: 'crm1' }), { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await processEvolutionWebhook({
+      event: 'MESSAGES_UPSERT',
+      instance: 'sender1',
+      data: {
+        key: { remoteJid: '919876543210@s.whatsapp.net', id: 'in-crm-neutral' },
+        message: { conversation: 'Thank you for contacting us. We are currently unavailable.' },
+      },
+    });
+
+    const lead = await getDb()('leads').where({ id: 'lead1' }).first();
+    expect(lead.status).toBe('replied');
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('updates send log status from MESSAGES_UPDATE', async () => {
@@ -168,6 +218,38 @@ describe('processEvolutionWebhook', () => {
     const update = await getDb()('message_updates').where({ sender_instance: 'sender1' }).orderBy('received_at', 'desc').first();
     expect(log.final_status).toBe('READ');
     expect(update.message_id).toBe('3EB078D805696DCAD2AC3F');
+  });
+
+  it('stores LID mapping from delivery updates for later replies', async () => {
+    const now = new Date().toISOString();
+    await getDb()('send_logs').insert({
+      id: 'log3',
+      lead_id: 'lead1',
+      campaign_id: 'camp1',
+      sender_instance: 'sender1',
+      recipient_jid: '919876543210@s.whatsapp.net',
+      message_id: '3EB0LIDUPDATE',
+      template_id: null,
+      attempt_count: 1,
+      evolution_status: 'PENDING',
+      final_status: 'PENDING',
+      raw_response: '{}',
+      sent_at: now,
+      resolved_at: null,
+    });
+    await processEvolutionWebhook({
+      event: 'messages.update',
+      instance: 'sender1',
+      data: {
+        keyId: '3EB0LIDUPDATE',
+        remoteJid: '123456789@lid',
+        status: 'DELIVERY_ACK',
+      },
+    });
+    const mapping = await getDb()('jid_mappings')
+      .where({ phone: '919876543210', sender_instance: 'sender1' })
+      .first();
+    expect(mapping.resolved_jid).toBe('123456789@lid');
   });
 
   it('handles unknown event types gracefully', async () => {
