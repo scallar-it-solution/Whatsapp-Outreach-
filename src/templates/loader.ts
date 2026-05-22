@@ -41,6 +41,11 @@ export async function loadTemplateFile(filePath: string): Promise<number> {
     const content = await readFile(filePath, 'utf8');
     const parsed = TemplateFileSchema.parse(YAML.parse(content));
     const now = new Date().toISOString();
+    const templateIds = parsed.templates.map((template) => template.id);
+    await getDb()<TemplateRow>('templates')
+      .where({ set_name: parsed.set })
+      .whereNotIn('id', templateIds)
+      .update({ active: 0 });
     for (const template of parsed.templates) {
       await getDb()<TemplateRow>('templates')
         .insert({

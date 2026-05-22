@@ -2,47 +2,29 @@ set: uae-realestate
 country: UAE
 category: real_estate
 templates:
-  - id: uae-re-1
-    name: instant-reply
+  - id: uae-re-short-1
+    name: chatbot-followup
     ab_label: A
     body: |
-      Hi {{business_name}}, quick question - are your property leads on WhatsApp getting replied to fast enough?
+      Hi {{business_name}}, many real estate leads go cold when WhatsApp follow-up is delayed.
 
-      We help real estate teams in UAE automate:
-      - Instant inquiry replies
-      - Buyer qualification by budget and location
-      - Site visit bookings
+      We build WhatsApp systems for:
+      - Instant chatbot replies
+      - Lead qualification
+      - Auto follow-ups and visit reminders
 
-      Reply DEMO and I'll show you a simple 5-min workflow.
+      Reply YES if you want to see a quick demo.
 
       - Scallar IT Solutions
 
-  - id: uae-re-2
-    name: cold-leads
+  - id: uae-re-short-2
+    name: whatsapp-assistant
     ab_label: B
     body: |
-      Hi {{business_name}} - how many leads go cold because no one replied in time?
+      Hi {{business_name}}, we can set up a WhatsApp assistant for your real estate inquiries.
 
-      We fix that with WhatsApp automation:
-      - Auto-reply 24/7, even after hours
-      - Send property details instantly
-      - Book site visits without manual work
+      It can reply instantly, share project details, qualify budget/location, and follow up automatically.
 
-      Reply YES and I'll send a quick walkthrough.
-
-      - Scallar IT Solutions
-
-  - id: uae-re-3
-    name: bot-intro
-    ab_label: C
-    body: |
-      Hi {{business_name}} - we build WhatsApp bots for real estate agencies in UAE.
-
-      Your bot handles:
-      - New inquiries automatically
-      - Property shortlisting by budget
-      - Follow-ups without your agents lifting a finger
-
-      Takes 7 days to set up. Reply INTERESTED to see how it works.
+      Reply DEMO and I will send a short walkthrough.
 
       - Scallar IT Solutions
