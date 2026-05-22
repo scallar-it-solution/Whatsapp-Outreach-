@@ -58,6 +58,10 @@ function extractMessageId(payload: EvolutionWebhookPayload): string | null {
   return payload.data?.key?.id ?? payload.data?.messageId ?? payload.data?.id ?? null;
 }
 
+function extractStatusMessageId(payload: EvolutionWebhookPayload): string | null {
+  return payload.data?.keyId ?? payload.data?.key?.id ?? payload.data?.messageId ?? payload.data?.id ?? null;
+}
+
 function extractStringFromMessage(message: unknown): string | null {
   if (!isRecord(message)) {
     return null;
@@ -234,7 +238,7 @@ async function handleMessagesUpdate(payload: EvolutionWebhookPayload): Promise<v
   try {
     const db = getDb();
     const instance = extractInstance(payload);
-    const messageId = extractMessageId(payload);
+    const messageId = extractStatusMessageId(payload);
     if (messageId === null) {
       throw new Error('MESSAGES_UPDATE missing message id');
     }

@@ -138,6 +138,38 @@ describe('processEvolutionWebhook', () => {
     expect(log.final_status).toBe('DELIVERY_ACK');
   });
 
+  it('prefers Evolution keyId over internal messageId for MESSAGES_UPDATE', async () => {
+    const now = new Date().toISOString();
+    await getDb()('send_logs').insert({
+      id: 'log2',
+      lead_id: 'lead1',
+      campaign_id: 'camp1',
+      sender_instance: 'sender1',
+      recipient_jid: '919876543210@s.whatsapp.net',
+      message_id: '3EB078D805696DCAD2AC3F',
+      template_id: null,
+      attempt_count: 1,
+      evolution_status: 'PENDING',
+      final_status: 'PENDING',
+      raw_response: '{}',
+      sent_at: now,
+      resolved_at: null,
+    });
+    await processEvolutionWebhook({
+      event: 'messages.update',
+      instance: 'sender1',
+      data: {
+        keyId: '3EB078D805696DCAD2AC3F',
+        messageId: 'cmpgehvb804b7mx4jwgse3nhs',
+        status: 'READ',
+      },
+    });
+    const log = await getDb()('send_logs').where({ id: 'log2' }).first();
+    const update = await getDb()('message_updates').where({ sender_instance: 'sender1' }).orderBy('received_at', 'desc').first();
+    expect(log.final_status).toBe('READ');
+    expect(update.message_id).toBe('3EB078D805696DCAD2AC3F');
+  });
+
   it('handles unknown event types gracefully', async () => {
     const result = await processEvolutionWebhook({ event: 'SOMETHING_ELSE', instance: 'sender1', data: {} });
     expect(result).toEqual({ handled: false, event: 'SOMETHING_ELSE' });

@@ -59,6 +59,7 @@ export interface EvolutionWebhookData {
   messageType?: string;
   pushName?: string;
   status?: string | number;
+  keyId?: string;
   messageId?: string;
   id?: string;
   state?: string;
