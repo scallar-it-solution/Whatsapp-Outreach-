@@ -45,6 +45,15 @@ SEND_ENABLED=false npm run worker
 SEND_ENABLED=true npm run worker
 ```
 
+## Docker Compose
+
+When the compose file is run from the repo root, pass the root `.env` explicitly so port
+interpolation matches the app config:
+
+```bash
+docker compose --env-file .env -p whatsapp-outreach -f deploy/docker-compose.yml up -d --build
+```
+
 ## Monitor Queue
 
 ```bash

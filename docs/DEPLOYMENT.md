@@ -22,7 +22,7 @@ Keep `SEND_ENABLED=false` until readiness tests pass.
 
 ```bash
 cp .env.example .env
-docker compose -f deploy/docker-compose.yml up -d --build
+docker compose --env-file .env -p whatsapp-outreach -f deploy/docker-compose.yml up -d --build
 ```
 
 SQLite data is persisted in `./data`. Redis data is stored in the named `redis-data` volume.
