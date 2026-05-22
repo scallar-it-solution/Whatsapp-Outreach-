@@ -3,6 +3,7 @@ import { config } from '../config/env';
 import { getDb } from '../db/client';
 import type { ReplyRow, SendLogRow, SenderRow, UnsubscribeRow } from '../db/schema';
 import { getDeadLetterQueue, getOutreachQueue } from '../queue/queues';
+import { assertRedisReachable } from '../queue/client';
 
 function todayIsoStart(): string {
   const date = new Date();
@@ -51,6 +52,7 @@ export function registerHealthRoutes(app: FastifyInstance): void {
           response.db_error = error instanceof Error ? error.message : 'unknown db error';
         }
         try {
+          await assertRedisReachable();
           response.queue_pending = await getOutreachQueue().getWaitingCount();
         } catch (error) {
           response.redis = 'degraded';

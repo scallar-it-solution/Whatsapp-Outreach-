@@ -2,6 +2,7 @@ import { isSupportedCountry } from '../config/constants';
 import { getDb } from '../db/client';
 import type { CampaignRow, CampaignStatus, LeadRow, UnsubscribeRow } from '../db/schema';
 import { getOutreachQueue } from '../queue/queues';
+import { assertRedisReachable } from '../queue/client';
 import type { OutreachJobData } from '../queue/types';
 import { createId } from '../utils/crypto';
 import { loadTemplatesFromConfig } from '../templates/loader';
@@ -94,6 +95,7 @@ export async function loadCampaignToQueue(campaignId: string): Promise<CampaignL
       .orderBy('created_at', 'asc');
     let enqueued = 0;
     let skippedUnsubscribed = 0;
+    await assertRedisReachable();
     const queue = getOutreachQueue();
     for (const lead of leads) {
       const unsubscribed = await db<UnsubscribeRow>('unsubscribes').where({ phone: lead.phone }).first();

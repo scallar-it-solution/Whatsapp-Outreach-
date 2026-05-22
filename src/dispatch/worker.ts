@@ -38,7 +38,7 @@ export function createOutreachWorker(): Worker<OutreachJobData, unknown, string>
       }
     },
     {
-      connection: buildRedisConnection(),
+      connection: buildRedisConnection('worker'),
       concurrency: 1,
     },
   );

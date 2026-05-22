@@ -4,8 +4,9 @@ import {
   OUTREACH_QUEUE_NAME,
   RETRY_QUEUE_NAME,
 } from '../config/constants';
-import { buildRedisConnection } from './client';
+import { assertRedisReachable, buildRedisConnection } from './client';
 import type { DeadLetterJobData, OutreachJobData, QueueCounts } from './types';
+import { logger } from '../utils/logger';
 
 let outreachQueue: Queue<OutreachJobData, unknown, string> | null = null;
 let retryQueue: Queue<OutreachJobData, unknown, string> | null = null;
@@ -16,6 +17,9 @@ export function getOutreachQueue(): Queue<OutreachJobData, unknown, string> {
     outreachQueue = new Queue<OutreachJobData, unknown, string>(OUTREACH_QUEUE_NAME, {
       connection: buildRedisConnection(),
     });
+    outreachQueue.on('error', (error) => {
+      logger.warn({ service: 'queue', queue: OUTREACH_QUEUE_NAME, err: error.message }, 'queue connection error');
+    });
   }
   return outreachQueue;
 }
@@ -24,6 +28,9 @@ export function getRetryQueue(): Queue<OutreachJobData, unknown, string> {
   if (retryQueue === null) {
     retryQueue = new Queue<OutreachJobData, unknown, string>(RETRY_QUEUE_NAME, {
       connection: buildRedisConnection(),
+    });
+    retryQueue.on('error', (error) => {
+      logger.warn({ service: 'queue', queue: RETRY_QUEUE_NAME, err: error.message }, 'queue connection error');
     });
   }
   return retryQueue;
@@ -34,12 +41,16 @@ export function getDeadLetterQueue(): Queue<DeadLetterJobData, unknown, string> 
     deadLetterQueue = new Queue<DeadLetterJobData, unknown, string>(DEAD_LETTER_QUEUE_NAME, {
       connection: buildRedisConnection(),
     });
+    deadLetterQueue.on('error', (error) => {
+      logger.warn({ service: 'queue', queue: DEAD_LETTER_QUEUE_NAME, err: error.message }, 'queue connection error');
+    });
   }
   return deadLetterQueue;
 }
 
 export async function getQueueCounts(): Promise<QueueCounts> {
   try {
+    await assertRedisReachable();
     const outreach = getOutreachQueue();
     const dead = getDeadLetterQueue();
     const [waiting, active, delayed, failed, completed, deadLetter] = await Promise.all([

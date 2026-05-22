@@ -1,5 +1,6 @@
 import type { Command } from 'commander';
 import { getDeadLetterQueue, getOutreachQueue, getQueueCounts, closeQueues } from '../../queue/queues';
+import { assertRedisReachable } from '../../queue/client';
 
 interface FlushOptions {
   confirm?: boolean;
@@ -43,6 +44,7 @@ export function registerQueueCommands(program: Command): void {
           if (options.confirm !== true) {
             throw new Error('queue:flush requires --confirm');
           }
+          await assertRedisReachable();
           await getOutreachQueue().drain(true);
           line('pending outreach jobs flushed');
         } catch (error) {
@@ -55,6 +57,7 @@ export function registerQueueCommands(program: Command): void {
   program.command('queue:retry-dead').description('Move dead-letter jobs back to outreach').action(() => {
     run(async () => {
       try {
+        await assertRedisReachable();
         const dead = getDeadLetterQueue();
         const outreach = getOutreachQueue();
         const jobs = await dead.getJobs(['waiting', 'delayed', 'failed'], 0, 500, false);
