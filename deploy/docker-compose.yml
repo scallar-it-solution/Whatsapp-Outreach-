@@ -22,7 +22,7 @@ services:
       REDIS_URL: redis://redis:6379
       SQLITE_PATH: /app/data/outreach.db
     ports:
-      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
+      - "127.0.0.1:${APP_PORT:-3000}:${APP_PORT:-3000}"
     volumes:
       - ../data:/app/data
     depends_on:
