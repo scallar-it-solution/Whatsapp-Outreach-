@@ -149,13 +149,21 @@ export class EvolutionClient {
             : typeof instance.name === 'string'
               ? instance.name
               : '';
+        const status =
+          typeof instance.status === 'string'
+            ? instance.status
+            : typeof instance.connectionStatus === 'string'
+              ? instance.connectionStatus
+              : typeof instance.state === 'string'
+                ? instance.state
+                : undefined;
         return {
           instanceName: name,
           owner: typeof instance.owner === 'string' ? instance.owner : undefined,
           profileName: typeof instance.profileName === 'string' ? instance.profileName : undefined,
           profilePictureUrl:
             typeof instance.profilePictureUrl === 'string' ? instance.profilePictureUrl : undefined,
-          status: typeof instance.status === 'string' ? instance.status : undefined,
+          status,
           raw: toJsonObject(item),
         };
       }).filter((item) => item.instanceName.length > 0);
