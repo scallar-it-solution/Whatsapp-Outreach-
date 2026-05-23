@@ -1,0 +1,41 @@
+set: australia-realestate
+country: Australia
+category: real_estate
+templates:
+  - id: au-re-1
+    name: ai-lead-response
+    ab_label: A
+    body: |
+      Hi {{business_name}}, saw your agency on Google - nice reviews!
+
+      Quick one - when a buyer enquires after hours, how quickly does your team respond?
+
+      We built an AI WhatsApp assistant that replies within 60 seconds, 24/7, and books the callback automatically.
+
+      Happy to show you a live 10-min demo. Keen?
+
+      - Scallar IT Solutions
+
+  - id: au-re-2
+    name: ai-social-content
+    ab_label: B
+    body: |
+      Hey {{business_name}}, came across your listings in {{city}} - solid work!
+
+      We built an AI system that turns property listings into ready-to-post Reels and captions automatically, so agents can stay visible while focusing on sales.
+
+      Want to see a quick demo?
+
+      - Scallar IT Solutions
+
+  - id: au-re-3
+    name: whatsapp-tenant-automation
+    ab_label: C
+    body: |
+      Hi {{business_name}}, how much time does your team spend on tenant messages, inspection reminders, rent notices, or availability enquiries?
+
+      We set up WhatsApp automation to handle repetitive conversations and follow-ups automatically.
+
+      Can I show you a 10-min demo? No commitment.
+
+      - Scallar IT Solutions
