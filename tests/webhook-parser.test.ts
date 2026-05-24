@@ -268,6 +268,7 @@ describe('processEvolutionWebhook', () => {
       provider: 'waha',
       waha_session: 'default',
       waha_base_url: 'http://waha:3000',
+      phone_number: '919876543210',
     });
     await getDb()('send_logs').insert({
       id: 'log-waha-1',
@@ -288,6 +289,7 @@ describe('processEvolutionWebhook', () => {
     const result = await processWahaWebhook({
       event: 'message.ack',
       session: 'default',
+      me: { id: '919876543210@c.us' },
       payload: {
         id: 'true_919876543210@c.us_3EB0WAHAACK',
         ackName: 'DEVICE',

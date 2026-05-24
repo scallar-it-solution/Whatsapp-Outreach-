@@ -256,6 +256,17 @@ export async function processWahaWebhook(rawPayload: unknown): Promise<WebhookPr
 async function getWahaSenderInstance(payload: WahaWebhookPayload): Promise<string> {
   try {
     const session = payload.session ?? 'default';
+    const meJid = payload.me?.id;
+    const mePhone = typeof meJid === 'string' ? extractPhoneFromJid(meJid) : null;
+    if (mePhone !== null) {
+      const byPhone = await getDb()<SenderRow>('senders')
+        .where({ provider: 'waha', phone_number: mePhone })
+        .orderBy('updated_at', 'desc')
+        .first();
+      if (byPhone !== undefined) {
+        return byPhone.instance_name;
+      }
+    }
     const sender = await getDb()<SenderRow>('senders')
       .where({ provider: 'waha', waha_session: session })
       .orderBy('updated_at', 'desc')
