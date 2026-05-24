@@ -10,6 +10,8 @@ import type { CampaignRow, LeadRow, MessageUpdateRow, SendLogRow, UnsubscribeRow
 import { updateSenderHealth } from '../evolution/sender-health';
 import { EvolutionClient } from '../evolution/client';
 import { extractMessageIdFromSendResponse, isSuccessAckStatus } from '../evolution/types';
+import { WahaClient } from '../waha/client';
+import { extractWahaMessageId } from '../waha/types';
 import { getDeadLetterQueue, getOutreachQueue } from '../queue/queues';
 import { buildRedisConnection } from '../queue/client';
 import type { DeadLetterJobData, OutreachJobData } from '../queue/types';
@@ -107,7 +109,10 @@ async function processOutreachJob(data: OutreachJobData): Promise<{ ok: boolean;
       return { ok: true, status: 'unsubscribed_dropped' };
     }
 
-    const recipientJid = await resolveRecipientJid(sender.instance_name, lead.phone);
+    const recipientJid =
+      sender.provider === 'waha'
+        ? `${lead.phone}@c.us`
+        : await resolveRecipientJid(sender.instance_name, lead.phone);
     const template = await selectTemplateForLead(data.templateSet, lead.id);
     const text = renderTemplate(template.body, {
       business_name: lead.business_name,
@@ -116,9 +121,18 @@ async function processOutreachJob(data: OutreachJobData): Promise<{ ok: boolean;
       country: lead.country,
     });
 
-    const evolution = new EvolutionClient();
-    const response = await evolution.sendTextMessage(sender.instance_name, recipientJid, text);
-    const messageId = extractMessageIdFromSendResponse(response);
+    const response =
+      sender.provider === 'waha'
+        ? await new WahaClient(sender.waha_base_url).sendTextMessage(
+            sender.waha_session ?? 'default',
+            recipientJid,
+            text,
+          )
+        : await new EvolutionClient().sendTextMessage(sender.instance_name, recipientJid, text);
+    const messageId =
+      sender.provider === 'waha'
+        ? extractWahaMessageId(response)
+        : extractMessageIdFromSendResponse(response);
     const now = new Date().toISOString();
     const logId = createId('log');
     await db<SendLogRow>('send_logs').insert({
@@ -130,7 +144,7 @@ async function processOutreachJob(data: OutreachJobData): Promise<{ ok: boolean;
       message_id: messageId,
       template_id: template.id,
       attempt_count: 1,
-      evolution_status: response.status ?? 'PENDING',
+      evolution_status: `${sender.provider}:${response.status ?? 'PENDING'}`,
       final_status: 'PENDING',
       raw_response: JSON.stringify(response),
       sent_at: now,

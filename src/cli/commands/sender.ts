@@ -1,6 +1,6 @@
 import type { Command } from 'commander';
-import { closeDb, runMigrations } from '../../db/client';
-import type { SenderRow, SenderStatus } from '../../db/schema';
+import { closeDb, getDb, runMigrations } from '../../db/client';
+import type { SenderProvider, SenderRow, SenderStatus } from '../../db/schema';
 import {
   listSenders,
   resumeSender,
@@ -22,6 +22,7 @@ function formatSender(sender: SenderRow): string {
   const readiness = sender.last_health_check_at === null ? 'never_tested' : sender.last_health_check_at;
   return [
     sender.instance_name.padEnd(24),
+    sender.provider.padEnd(10),
     sender.status.padEnd(12),
     String(sender.health_score).padEnd(8),
     `${sender.sent_today}/${sender.daily_limit}`.padEnd(10),
@@ -52,7 +53,7 @@ export function registerSenderCommands(program: Command): void {
       try {
         await runMigrations();
         const senders = await listSenders();
-        line('INSTANCE                  STATUS        HEALTH    SENT       READINESS');
+        line('INSTANCE                  PROVIDER    STATUS        HEALTH    SENT       READINESS');
         for (const sender of senders) {
           line(formatSender(sender));
         }
@@ -100,6 +101,36 @@ export function registerSenderCommands(program: Command): void {
   program.command('sender:quarantine <instance>').description('Quarantine sender').action((instance: string) => {
     run(() => setStatus(instance, 'quarantined'));
   });
+
+  program
+    .command('sender:provider <instance>')
+    .requiredOption('--provider <provider>')
+    .option('--waha-base-url <url>')
+    .option('--waha-session <session>')
+    .description('Set sender provider: evolution or waha')
+    .action((instance: string, options: { provider: string; wahaBaseUrl?: string; wahaSession?: string }) => {
+      run(async () => {
+        try {
+          await runMigrations();
+          if (options.provider !== 'evolution' && options.provider !== 'waha') {
+            throw new Error('provider must be evolution or waha');
+          }
+          const provider = options.provider as SenderProvider;
+          await getDb()<SenderRow>('senders')
+            .where({ instance_name: instance })
+            .update({
+              provider,
+              waha_base_url: provider === 'waha' ? options.wahaBaseUrl ?? null : null,
+              waha_session: provider === 'waha' ? options.wahaSession ?? 'default' : null,
+              updated_at: new Date().toISOString(),
+            });
+          line(`sender ${instance} provider set to ${provider}`);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'unknown sender provider error';
+          throw new Error(`sender:provider failed: ${message}`);
+        }
+      });
+    });
 
   program.command('sender:sync-from-evolution').description('Sync Evolution instances').action(() => {
     run(async () => {

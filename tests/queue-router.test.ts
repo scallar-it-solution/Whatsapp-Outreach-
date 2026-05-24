@@ -2,11 +2,13 @@ import knex, { type Knex } from 'knex';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { closeDb, getDb, replaceDbForTests } from '../src/db/client';
 import * as senderMigration from '../src/db/migrations/001_senders';
+import * as providerMigration from '../src/db/migrations/010_sender_providers';
 import { selectSender } from '../src/dispatch/router';
 
 async function setupDb(): Promise<Knex> {
   const db = knex({ client: 'better-sqlite3', connection: { filename: ':memory:' }, useNullAsDefault: true });
   await senderMigration.up(db);
+  await providerMigration.up(db);
   replaceDbForTests(db);
   return db;
 }

@@ -11,7 +11,8 @@ import * as m006 from '../src/db/migrations/006_message_updates';
 import * as m007 from '../src/db/migrations/007_replies';
 import * as m008 from '../src/db/migrations/008_jid_mappings';
 import * as m009 from '../src/db/migrations/009_unsubscribes';
-import { processEvolutionWebhook } from '../src/webhook/handler';
+import * as m010 from '../src/db/migrations/010_sender_providers';
+import { processEvolutionWebhook, processWahaWebhook } from '../src/webhook/handler';
 
 async function setupDb(): Promise<Knex> {
   const db = knex({ client: 'better-sqlite3', connection: { filename: ':memory:' }, useNullAsDefault: true });
@@ -24,6 +25,7 @@ async function setupDb(): Promise<Knex> {
   await m007.up(db);
   await m008.up(db);
   await m009.up(db);
+  await m010.up(db);
   replaceDbForTests(db);
   return db;
 }
@@ -45,6 +47,9 @@ async function seedCore(): Promise<void> {
     last_health_check_at: now,
     supports_lid: 0,
     notes: null,
+    provider: 'evolution',
+    waha_base_url: null,
+    waha_session: null,
     created_at: now,
     updated_at: now,
   });
@@ -255,5 +260,48 @@ describe('processEvolutionWebhook', () => {
   it('handles unknown event types gracefully', async () => {
     const result = await processEvolutionWebhook({ event: 'SOMETHING_ELSE', instance: 'sender1', data: {} });
     expect(result).toEqual({ handled: false, event: 'SOMETHING_ELSE' });
+  });
+
+  it('updates send log status from WAHA message.ack', async () => {
+    const now = new Date().toISOString();
+    await getDb()('senders').where({ instance_name: 'sender1' }).update({
+      provider: 'waha',
+      waha_session: 'default',
+      waha_base_url: 'http://waha:3000',
+    });
+    await getDb()('send_logs').insert({
+      id: 'log-waha-1',
+      lead_id: 'lead1',
+      campaign_id: 'camp1',
+      sender_instance: 'sender1',
+      recipient_jid: '919876543210@c.us',
+      message_id: '3EB0WAHAACK',
+      template_id: null,
+      attempt_count: 1,
+      evolution_status: 'waha:PENDING',
+      final_status: 'PENDING',
+      raw_response: '{}',
+      sent_at: now,
+      resolved_at: null,
+    });
+
+    const result = await processWahaWebhook({
+      event: 'message.ack',
+      session: 'default',
+      payload: {
+        id: 'true_919876543210@c.us_3EB0WAHAACK',
+        ackName: 'DEVICE',
+        ack: 2,
+        fromMe: true,
+      },
+    });
+
+    const log = await getDb()('send_logs').where({ id: 'log-waha-1' }).first();
+    const update = await getDb()('message_updates')
+      .where({ sender_instance: 'sender1', message_id: '3EB0WAHAACK' })
+      .first();
+    expect(result).toEqual({ handled: true, event: 'MESSAGE_ACK' });
+    expect(log.final_status).toBe('DELIVERY_ACK');
+    expect(update.status).toBe('DELIVERY_ACK');
   });
 });

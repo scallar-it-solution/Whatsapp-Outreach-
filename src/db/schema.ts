@@ -1,6 +1,7 @@
 import type { FinalMessageStatus, SupportedCountry } from '../config/constants';
 
 export type SenderStatus = 'active' | 'paused' | 'quarantined' | 'disabled';
+export type SenderProvider = 'evolution' | 'waha';
 export type CampaignStatus = 'draft' | 'active' | 'paused' | 'completed' | 'failed';
 export type LeadStatus =
   | 'queued'
@@ -28,6 +29,9 @@ export interface SenderRow {
   last_health_check_at: string | null;
   supports_lid: number;
   notes: string | null;
+  provider: SenderProvider;
+  waha_base_url: string | null;
+  waha_session: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -125,6 +125,9 @@ async function recordReadiness(
         last_health_check_at: now,
         supports_lid: 0,
         notes: null,
+        provider: 'evolution',
+        waha_base_url: null,
+        waha_session: null,
         created_at: now,
         updated_at: now,
       });

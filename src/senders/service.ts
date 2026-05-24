@@ -1,6 +1,6 @@
 import { config } from '../config/env';
 import { getDb } from '../db/client';
-import type { SenderRow, SenderStatus } from '../db/schema';
+import type { SenderProvider, SenderRow, SenderStatus } from '../db/schema';
 import { EvolutionClient } from '../evolution/client';
 import { createId } from '../utils/crypto';
 
@@ -11,6 +11,9 @@ export interface SenderInput {
   status?: SenderStatus;
   supportsLid?: boolean;
   notes?: string;
+  provider?: SenderProvider;
+  wahaBaseUrl?: string;
+  wahaSession?: string;
 }
 
 export async function upsertSender(input: SenderInput): Promise<void> {
@@ -31,6 +34,9 @@ export async function upsertSender(input: SenderInput): Promise<void> {
       last_health_check_at: null,
       supports_lid: input.supportsLid === true ? 1 : 0,
       notes: input.notes ?? null,
+      provider: input.provider ?? 'evolution',
+      waha_base_url: input.wahaBaseUrl ?? null,
+      waha_session: input.wahaSession ?? null,
       created_at: now,
       updated_at: now,
     };
@@ -42,6 +48,9 @@ export async function upsertSender(input: SenderInput): Promise<void> {
         label: row.label,
         supports_lid: row.supports_lid,
         notes: row.notes,
+        provider: row.provider,
+        waha_base_url: row.waha_base_url,
+        waha_session: row.waha_session,
         updated_at: now,
       });
   } catch (error) {

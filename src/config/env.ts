@@ -52,6 +52,8 @@ const EnvSchema = z
     DATABASE_URL: optionalString,
     EVOLUTION_BASE_URL: z.string().url(),
     EVOLUTION_API_KEY: z.string().min(1, 'EVOLUTION_API_KEY is required'),
+    WAHA_API_KEY: optionalString,
+    WAHA_BASE_URL: optionalString,
     ACTIVE_SENDERS: csvList.default([]),
     DEFAULT_DELAY_MIN_SECONDS: integerFromEnv('DEFAULT_DELAY_MIN_SECONDS', 0).default(45),
     DEFAULT_DELAY_MAX_SECONDS: integerFromEnv('DEFAULT_DELAY_MAX_SECONDS', 1).default(90),
