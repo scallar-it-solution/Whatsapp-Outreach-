@@ -99,6 +99,13 @@ async function processOutreachJob(data: OutreachJobData): Promise<{ ok: boolean;
       await moveToDeadLetter(data, 'lead not found');
       return { ok: false, status: 'deadletter_missing_lead' };
     }
+    if (lead.status !== 'queued') {
+      logger.info(
+        { service: 'dispatcher', leadId: lead.id, status: lead.status },
+        'skipped lead that is no longer queued',
+      );
+      return { ok: true, status: `lead_${lead.status}_skipped` };
+    }
 
     const unsubscribed = await db<UnsubscribeRow>('unsubscribes').where({ phone: lead.phone }).first();
     if (unsubscribed !== undefined) {

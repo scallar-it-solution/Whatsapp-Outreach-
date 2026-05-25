@@ -2,40 +2,30 @@ set: australia-realestate
 country: Australia
 category: real_estate
 templates:
-  - id: au-re-1
-    name: ai-lead-response
+  - id: au-re-speed-1
+    name: five-minute-response
     ab_label: A
     body: |
-      Hi {{business_name}}, saw your agency on Google - nice reviews!
+      Hi {{business_name}}, quick question for your {{city}} enquiries.
 
-      Quick one - when a buyer enquires after hours, how quickly does your team respond?
+      Lead-response data shows conversion is much stronger when new enquiries are handled in the first 5 minutes.
 
-      We built an AI WhatsApp assistant that replies within 60 seconds, 24/7, and books the callback automatically.
+      We set up a WhatsApp AI that replies in under 60 seconds, qualifies budget/suburb/timeline, and books the callback for your team.
 
-      Happy to show you a live 10-min demo. Keen?
+      Worth seeing a 10-min demo?
 
       - Scallar IT Solutions
 
-  - id: au-re-2
-    name: ai-social-content
+  - id: au-re-followup-2
+    name: market-follow-up
     ab_label: B
     body: |
-      Hey {{business_name}}, came across your listings in {{city}} - solid work!
+      Hi {{business_name}}, the AU market is getting more selective - price growth is uneven and buyers compare more options before acting.
 
-      We built an AI system that turns property listings into ready-to-post Reels and captions automatically, so agents can stay visible while focusing on sales.
+      The leak I usually see is follow-up: appraisal leads, inspection enquiries, and old buyer chats go cold.
 
-      Want to see a quick demo?
+      We build WhatsApp automation that follows up, sends inspection reminders, and hands hot replies back to your agents.
 
-      - Scallar IT Solutions
-
-  - id: au-re-3
-    name: whatsapp-tenant-automation
-    ab_label: C
-    body: |
-      Hi {{business_name}}, how much time does your team spend on tenant messages, inspection reminders, rent notices, or availability enquiries?
-
-      We set up WhatsApp automation to handle repetitive conversations and follow-ups automatically.
-
-      Can I show you a 10-min demo? No commitment.
+      Want a quick example for {{city}} agencies?
 
       - Scallar IT Solutions
